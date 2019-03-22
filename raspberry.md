@@ -33,8 +33,8 @@ ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 
 network={
-    ssid="ElaoGuest"
-    psk="elao69nicorn"
+    ssid="Mon SSID"
+    psk="Cleduwifi"
 }
 ```
 
@@ -48,3 +48,4 @@ Vous pouvez vérifier que votre Raspberry est correctement connecté en vérifia
        valid_lft forever preferred_lft forever
 ```
 
+Une fois connecté nous pouvons mettre à jour notre Raspberry via *APT*: `apt update`
