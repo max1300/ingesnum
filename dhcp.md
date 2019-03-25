@@ -87,6 +87,7 @@ Il «suffit» d'ajouter une directive «host» dans la définition du subnet. Le
 
 On modifie donc le fichier de configuration `/etc/dhcp/dhcpd.conf` en y rajoutant les informations suivantes au niveau du subnet:
 
+```
 subnet 192.168.1.0 netmask 255.255.255.0 {
   host mysql-1 {
    hardware ethernet b8:27:eb:9d:11:1b;
@@ -98,5 +99,5 @@ subnet 192.168.1.0 netmask 255.255.255.0 {
   }
   range 192.168.1.10 192.168.1.100;
 }
-
+```
 

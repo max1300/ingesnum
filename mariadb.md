@@ -42,7 +42,7 @@ Si l'on souhaite modifier le mot de passe d'un utilisateur
 
 ## Créer une base de données
 
-`CREATE DATABASE ma_base;
+`CREATE DATABASE ma_base`;
 
 ## Donner des droits à un utilisateur sur une base de données
 
