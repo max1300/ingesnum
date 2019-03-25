@@ -30,10 +30,6 @@ option domain-name-servers 192.168.1.1, 192.168.1.2;
 option domain-name "ingesnum.lan";
 
 subnet 192.168.1.0 netmask 255.255.255.0 {
-  #host ns-1 {
-  # hardware ethernet DD:GH:DF:E5:F7:D7;
-  # fixed-address 192.168.1.2;
-  #}
   range 192.168.1.10 192.168.1.100;
 }
 ```
@@ -84,3 +80,23 @@ static domain_name_servers=192.168.1.1 8.8.8.8
 Arriver à ce stade nous pouvons redémarrer le Raspberry Pi qui devrait à présent être disponible sur l'IP *192.168.1.1*
 
 NB: Il est possible de consulter les «leases» accorder par notre serveur dans le fichier `/var/lib/dhcp/dhcpd.leases`
+
+## Affecter des adresses statiques à certains hôtes
+
+Il «suffit» d'ajouter une directive «host» dans la définition du subnet. Le principe est de donner à un client une adresse précise en fonction de son adresse MAC.
+
+On modifie donc le fichier de configuration `/etc/dhcp/dhcpd.conf` en y rajoutant les informations suivantes au niveau du subnet:
+
+subnet 192.168.1.0 netmask 255.255.255.0 {
+  host mysql-1 {
+   hardware ethernet b8:27:eb:9d:11:1b;
+   fixed-address 192.168.1.11;
+  }
+  host web-1 {
+   hardware ethernet b8:27:eb:49:b9:8b;
+   fixed-address 192.168.1.12;
+  }
+  range 192.168.1.10 192.168.1.100;
+}
+
+

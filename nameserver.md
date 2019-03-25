@@ -161,3 +161,5 @@ $TTL    604800
 1   IN      PTR     ns-1.ingesnum.lan.
 2   IN      PTR     ns-2.ingesnum.lan.
 ```
+
+On redémarre notre serveur bind avec `service bind9 restart`
