@@ -49,3 +49,54 @@ Vous pouvez vérifier que votre Raspberry est correctement connecté en vérifia
 ```
 
 Une fois connecté nous pouvons mettre à jour notre Raspberry via *APT*: `apt update`
+
+## Donner une IP statique à son Raspberry
+
+La procédure de Raspbian pour affecter une IP statique à son Raspberry passe par dhcpcd (et non pas par `/etc/network/interfaces`).
+
+Il nous faut donc éditer le fichier `/etc/dhcpcd.conf`:
+
+`nano /etc/dhcpcd.conf`
+
+Et modifier la section «static IP configuration» comme ci-dessous:
+
+```
+interface eth0
+static ip_address=192.168.1.2/24
+#static ip6_address=fd51:42f8:caae:d92e::ff/64
+#static routers=192.168.1.1
+static domain_name_servers=192.168.1.2 8.8.8.8
+```
+
+Cette configuration permet au Raspberry, dans le cas ou aucun serveur DHCP n'est disponible sur le réseau de prendre l'IP `192.168.1.2`
+
+## Transformer son Raspberry Pi en passerelle internet.
+
+Si vous disposez d'un Raspberry Pi avec deux interfaces réseau (Wifi et Ethernet) vous pouvez le transformer relativement facilement en passerelle internet et partager votre connexion avec l'ensemble des machines que vous lui connecterez.
+
+Première étape, activer le routage IP en modifiant le fichier: `/etc/sysctl.conf`
+
+`nano /etc/sysctl.conf`
+
+Et on décommente la ligne `net.ipv4.ip_forward=1`
+
+Il nous reste à router les paquets arrivant sur l'interface `eth0` vers l'interface `wlan0`, nous utiliserons iptables pour le faire:
+
+```
+iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i eth0 -o wlan0 -j ACCEPT
+```
+
+Pour terminer nous allons persister ses règles à l'aide du paquet `iptables-persistent`, s'il n'est pas déja installé, faites le: `apt install iptables-persistent`
+
+On sauvegarde nos règles `iptables-save > /etc/iptables/rules.v4` et on redémarre pour vérifier qu'elles sont correctement chargées.
+
+
+
+
+
+
+
+
+
