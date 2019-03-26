@@ -23,7 +23,8 @@ cat Connaisseurs/toto
 # Les utilisateurs
 
 - Votre compte d'utilisateur est-il défini dans le fichier `/etc/passwd` ? Pourquoi ? Il y a-t-il d'autres alternatives ?
-- Quel est le répertoire de connexion de l’utilisateur root ?
-- Quel est le shell de l’utilisateur root ?
-- Quelle est la particularité de l’utilisateur nobody? Et de l’utilisateur shutdown ?
-- Quels sont les utilisateurs définis dans /etc/passwd qui font partie du même groupe que l’administrateur ?
+- Quel est le répertoire de connexion de l’utilisateur `root` ?
+- Quel est le shell de l’utilisateur `root` ?
+- Quelle est la particularité de l’utilisateur nobody?
+- Quels sont les utilisateurs définis dans `/etc/passwd` qui font partie du même groupe que nobody ?
+
