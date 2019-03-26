@@ -13,7 +13,7 @@
 # Répertoires et fichiers
 
 - Lister le contenur du répertoire `/etc`
-- Lister de manière détaillée le contenu du répertoire /etc.
+- Lister de manière détaillée le contenu du répertoire `/etc`.
 - Lister le contenu du répertoire `/dev`.
 - Lister le contenu du fichier `/etc/passwd`.
 - Lister le contenu du fichier `/etc/shadow`.
