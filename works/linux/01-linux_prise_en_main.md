@@ -1,6 +1,6 @@
 # Linux - Prise en main
 
-À partir de maintenant toutes les commandes seront tapées dans un terminal. Vous vous reporterez au cours pour la syntaxe des commandes utilisées (et les exemples).
+À partir de maintenant toutes les commandes seront tapées dans un terminal. 
 
 ## Naviguer dans les répertoires
 
