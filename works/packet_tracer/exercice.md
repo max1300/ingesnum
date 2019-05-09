@@ -34,7 +34,7 @@ Le réseau local de la DSI doit toutefois pouvoir communiquer avec le réseau lo
 
 ### Paris
 
-À Paris on retrouveras la direction administrative et les commerciaux qui sont répartis sur 2 étages.
+À Paris on retrouveras la direction administrative et les commerciaux qui sont répartis sur 2 étages et qui disposent respectivement de 4 postes.
 
 - Le réseau local sera, comme à Lyon de la forme 192.168.1.0/24
 - Les IPs allant de 11 à 20 seront réservées au fonctionnement de l'infrastructure de l'entreprise (Routeurs, serveurs ...)
@@ -45,6 +45,10 @@ Le réseau local de la DSI doit toutefois pouvoir communiquer avec le réseau lo
 
 - D'un serveur DHCP
 - D'un serveur DNS
+
+### Itinérants
+
+Chacun des deux sites disposent de personnel en itinérance qui auront donc besoin d'un point d'accès sans fil (WPA2)
 
 ### Matériel
 
