@@ -11,7 +11,7 @@
 
 ## Pré-requis
 
-- Une clé SSH ** personnelle*
+- Une clé SSH **personnelle**
 - Un cloud provider proposant Openstack
 - Un accès à Horizon (L'outil de pilotage web d'openstack)
 - Un nom de domaine
@@ -30,6 +30,7 @@ Points à valider:
 - Savoir rattacher un volume
 - Savoir créer un security group et comprendre son fonctionnement.
 - Savoir importer sa clé SSH
+- Utiliser une IP failover
 - Créer un script de post installation.
 
 ## Concevoir l'infrastructure
@@ -67,9 +68,15 @@ La configuration réseau passe par l'API Openstack
  $
  ```
 
+Il est possible de supprimer un port réseau comme suit
+
+```
+openstack port unset --fixed-ip subnet=4c611106-c998-42fb-885f-358291f96074,ip-address=10.12.0.28 e3ec145c-ad00-45a9-9ac9-1647ff323518
+```
+
 Il nous faut à présent transformer notre LB en gateway en routant les paquets qui viennent du réseau privé vers «l'extétieur».
 
-La configuration est identique à celle du Raspberry.
+La configuration est identique à celle du [Raspberry](../../tutorials/raspberry.md).
 
 Il nous reste à configurer notre LB de la même manière que l'exercice avec le [Raspberry](../../tutorials/haproxy.md) également
 
@@ -79,9 +86,105 @@ Il n'est accessible que sur le réseau privé
 
 ### Conteneur Web
 
+Sa configuration est similaire à la configuration du [wordpress](../../tutorials/wordpress.md) moyennant quelques adaptations propres au projet que l'on souhaite faire fonctionner.
+
+```
+server {
+    listen 10.12.0.19:80;
+    server_name nuumfactory.fr;
+    root /srv;
+    location / {
+        index index.php;
+        try_files $uri $uri/ /index.php?$args;
+    }
+    location ~ [^/]\.php(/|$) {
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        fastcgi_read_timeout 60s;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_param HTTPS off;
+    }
+}
+```
+
 ### Conteneur de base de données
 
+On y installera une base de données de type MariaDB comme vu avec l'exercice avec les [Rasp](../../tutorials/mariadb.md)
+
 ### Le stockage
-iu!<u>@@</u>
 
+Si l'on souhaite utiliser un volume «persistant» de manière à conserver les données même lors de la destuction du conteneur il est nécessaire d'utiliser un volume.
 
+Après avoir créé un volume dans Horizon ou avec l'API il est nécessaire de le rattacher à une instance.
+Une fois rattaché il nous faudra partitionner le volume en question et créer le système de fichier.
+
+Identifier le disque que l'on souhaite utilisé
+
+```
+root@lb-1:/home/debian# sudo lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  10G  0 disk
+`-sda1   8:1    0  10G  0 part /
+sdb      8:16   0   1G  0 disk
+```
+
+Une fois identifié on créer la partition:
+
+```
+sudo parted /dev/sdb mklabel gpt
+```
+
+```
+sudo parted -a opt /dev/sda mkpart primary ext4 0% 100%
+```
+
+Et on créer le système de fichier
+
+```
+sudo mkfs.ext4 -L datapartition /dev/sda1
+```
+
+### Les groupes de sécurité
+
+### Cluster de DB
+
+MariaDB embarque un cluster SQL appelé Galera permettant d'assurer de la haute disponibilité en terme de données et de renforcer la résilience des instances de stockage.
+
+Ajouter un fichier `galera.cnf` dans `/etc/mysql/conf.d/`
+
+```
+[mysqld]
+user = mysql
+binlog_format = ROW
+default-storage-engine = innodb
+innodb_autoinc_lock_mode = 2
+innodb_flush_log_at_trx_commit = 0
+query_cache_type = 0
+query_cache_size = 0
+bind-address = 0.0.0.0
+
+[galera]
+wsrep_on = ON
+wsrep_provider = /usr/lib/galera/libgalera_smm.so
+wsrep_provider_options = gcache.size=300M; gcache.page_size=1G
+wsrep_cluster_name = nuumfactory
+wsrep_cluster_address = gcomm://10.12.0.193,10.12.0.151,10.12.0.92
+wsrep_sst_method = rsync
+wsrep_node_address = 10.12.0.193
+wsrep_node_name = 10.12.0.193
+```
+
+Démarrer un serveur galera `galera_new_cluster` (uniquement le premier noeud)
+
+Vérifier qu'il fonctionne correctement
+
+```
+mysql -uroot -e "SHOW STATUS LIKE 'wsrep%'"
+```
+
+Démarrer un noeud
+```
+systemctl start mysql
+```
