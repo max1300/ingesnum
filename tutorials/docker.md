@@ -46,6 +46,63 @@ services:
 +     - ./my_project:/srv
 ```
 
+Et créer un nouveau répertoire `nginx` qui contiendra les configurations du serveur web
+
+Dans ce répertoire nous créerons un fichier `myproject.conf` qui définira la configuration pour accéder à nos fichiers
+
+```
+server {
+    server_name myproject.local;
+    root /srv;
+    index index.html;
+    error_log  /var/log/nginx/error.log;
+    access_log /var/log/nginx/access.log;
+}
+```
+
+et nous le rajoutons dans compose
+
+```diff
+version: '3.3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+   volumes:
+     - ./my_project:/srv
++    - ./nginx/myproject.conf:/etc/nginx/conf.d/myproject.conf
+```
+
+### Le conteneur PHP-FPM
+
+Nous rajoutons un service php dans notre compose et on lie notre conteneur nginx au conteneur php
+
+```
+version: '3.3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+   volumes:
+     - ./my_project:/srv
+     - ./nginx/myproject.conf:/etc/nginx/conf.d/myproject.conf
+   links:
+     - php
+  php:
+    image: php:7-fpm
+```
+
+Un `docker ps` doit normalement nous indiquer que les deux conteneurs fonctionnent:
+
+```
+⇒  docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                  NAMES
+e9733b9c14ec        nginx:latest        "nginx -g 'daemon of…"   59 seconds ago       Up 57 seconds       0.0.0.0:8080->80/tcp   compose_nginx_1
+844691f80eac        php:7-fpm           "docker-php-entrypoi…"   About a minute ago   Up 58 seconds       9000/tcp               compose_php_1
+```
+
 ## Tips
 
 ### Ouvrir un shell sur un conteneur en cours de fonctionnement

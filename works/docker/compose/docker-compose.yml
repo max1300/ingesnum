@@ -6,3 +6,7 @@ services:
       - "8080:80"
     volumes:
       - ./my_project:/srv
+    links:
+      - php
+  php:
+    image: php:7-fpm
