@@ -189,6 +189,10 @@ On notera l'alias mariadb -> mysql
 
 ## Tips
 
+### Construire un conteneur
+
+`docker build . -t tagname`
+
 ### Ouvrir un shell sur un conteneur en cours de fonctionnement
 
 `docker exec -it [container-id] /bin/bash`
