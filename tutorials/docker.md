@@ -78,6 +78,83 @@ services:
 
 Nous rajoutons un service php dans notre compose et on lie notre conteneur nginx au conteneur php
 
+```diff
+version: '3.3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+   volumes:
+     - ./my_project:/srv
+     - ./nginx/myproject.conf:/etc/nginx/conf.d/myproject.conf
++   links:
++     - php
++  php:
++    image: php:7-fpm
+```
+
+Un `docker ps` doit normalement nous indiquer que les deux conteneurs fonctionnent:
+
+```
+⇒  docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                  NAMES
+e9733b9c14ec        nginx:latest        "nginx -g 'daemon of…"   59 seconds ago       Up 57 seconds       0.0.0.0:8080->80/tcp   compose_nginx_1
+844691f80eac        php:7-fpm           "docker-php-entrypoi…"   About a minute ago   Up 58 seconds       9000/tcp               compose_php_1
+```
+
+Nous devons à présent indiquer à Nginx comment gérer les fichiers php en faisant une mise à jour de notre fichier de configuration.
+
+```diff
+server {
+    server_name myproject.local;
+    root /srv;
++   index index.php;
+    error_log  /var/log/nginx/error.log;
+    access_log /var/log/nginx/access.log;
+
++    location ~ \.php$ {
++        try_files $uri =404;
++        fastcgi_split_path_info ^(.+\.php)(/.+)$;
++        fastcgi_pass php:9000;
++        fastcgi_index index.php;
++        include fastcgi_params;
++        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
++        fastcgi_param PATH_INFO $fastcgi_path_info;
++    }
+}
+```
+
+En relançant notre stack docker nous devrions avoir ... une erreur «File not found» 🤔
+
+Comme nous travaillons sur des environnements d'exploitation cloisonés nginx n'a pas à disposition le code source de l'application.
+
+Il faut donc lui faire «monter» le code source.
+
+```diff
+version: '3.3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+   volumes:
+     - ./my_project:/srv
+     - ./nginx/myproject.conf:/etc/nginx/conf.d/myproject.conf
+   links:
+     - php
+  php:
+    image: php:7-fpm
+   volumes:
++     - ./my_project:/srv
+```
+
+On redémarre la stack.
+
+### Le conteneur de base de données
+
+Rajoutons un conteneur MariaDB
+
 ```
 version: '3.3'
 services:
@@ -92,22 +169,29 @@ services:
      - php
   php:
     image: php:7-fpm
+   volumes:
+     - ./my_project:/srv
++   links:
++     - mariadb:mysql
++  mariadb:
++    image: mariadb
++    environment:
++      - MYSQL_ROOT_PASSWORD=password
++      - MYSQL_DATABASE=myproject
++      - MYSQL_USER=myproject
++      - MYSQL_PASSWORD=mypassword
++    volumes:
++      - ./database:/var/lib/mysql
 ```
 
-Un `docker ps` doit normalement nous indiquer que les deux conteneurs fonctionnent:
-
-```
-⇒  docker ps
-CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS                  NAMES
-e9733b9c14ec        nginx:latest        "nginx -g 'daemon of…"   59 seconds ago       Up 57 seconds       0.0.0.0:8080->80/tcp   compose_nginx_1
-844691f80eac        php:7-fpm           "docker-php-entrypoi…"   About a minute ago   Up 58 seconds       9000/tcp               compose_php_1
-```
+Et une connexion vers la base dans notre page PHP.
+On notera l'alias mariadb -> mysql
 
 ## Tips
 
 ### Ouvrir un shell sur un conteneur en cours de fonctionnement
 
-`docker exec -it [container-id] /bin/bash
+`docker exec -it [container-id] /bin/bash`
 
 ### Arrêter tous les conteneurs Docker:
 

@@ -6,7 +6,21 @@ services:
       - "8080:80"
     volumes:
       - ./my_project:/srv
+      - ./nginx/myproject.conf:/etc/nginx/conf.d/myproject.conf
     links:
       - php
   php:
-    image: php:7-fpm
+    image: custom_php
+    volumes:
+      - ./my_project:/srv
+    links:
+      - mariadb:mysql
+  mariadb:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=myproject
+      - MYSQL_USER=myproject
+      - MYSQL_PASSWORD=mypassword
+    volumes:
+      - ./database:/var/lib/mysql
