@@ -249,11 +249,11 @@ ls -l toto.tar
 tar -tvf toto.tar
 ```
 
-4. Créer un autre répertoire `Systeme/dossier_1/archive` et mettez y l'archive et désarchivez la (`tar -xvf`). Supprimer pour finir le dossier `Systeme/dossier_1/toto`
+4. Créer un autre répertoire `Systeme/dossier_1/archive` et mettez y l'archive et désarchivez la (`tar -xfv`). Supprimer pour finir le dossier `Systeme/dossier_1/toto`
 
 5. Compressez l'archive tar à l'aide de la commande `gzip` (option `-9`). Vérifier la taille de votre archive compressée par rapport à votre archive d'origine.
 
-Il est possible d'allier le meilleur des deux en utilisant l'option `-z` de la commande `tar`: `tar -cvfz toto.tgz toto`
+Il est possible d'allier le meilleur des deux en utilisant l'option `-z` de la commande `tar`: `tar -cvzf toto.tgz toto`
 
 
 
